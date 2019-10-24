@@ -11,21 +11,23 @@ user.request("/", (req, response) => {
         const newstate = query.perams.perma;
         //first see if its in the cache
         check_cache(newstate, (re) => {
-            if (re.exists == true) {
+            if (re.message == "OK") {
+                // exists
                 wikiJSON = re.data;
                 fromwho = "Reids cache";
             }
-            else if (re.exists == false && message == "ERROR") {
+            else if (message == "ERROR") {
+                // error handling
                 return pagewithanerror;
             }
             else {
-                //then the databzse
+                // then the databzse
                 check_database(newstate, (re) => {
-                    if (re.exists == true) {
+                    if (re.message == "MISSING") {
                         wikiJSON = re.data;
                         fromwho = "S3 database";
                     }
-                    else if (re.exists == false && message == "ERROR") {
+                    else if (message == "ERROR") {
                         return pagewithanerror;
                     }
                 });
@@ -60,7 +62,6 @@ function check_cache(key) {
         if (err) {
             //handle error
             return {
-                exists: false,
                 message: "ERROR",
                 data: err
             }
@@ -70,7 +71,6 @@ function check_cache(key) {
             //show cache
             const resultJSON = JSON.parse(res);
             return {
-                exists: true,
                 message: "OK",
                 data: resultJSON.body
             }
@@ -78,8 +78,7 @@ function check_cache(key) {
         //otherwise it's not there
         else {
             return {
-                exists: false,
-                message: "OK",
+                message: "MISSING",
                 data: null
             }
         }
@@ -93,7 +92,6 @@ function check_database(key) {
         if (err) {
             //handle error
             return {
-                exists: false,
                 message: "ERROR",
                 data: err
             }
@@ -105,7 +103,6 @@ function check_database(key) {
             //save to the cache
             redisClient.setex(redisKey, 3600, JSON.stringify({ source: 'Redis Cache', body: resultJSON, }));
             return {
-                exists: true,
                 message: "OK",
                 data: resultJSON
             }
@@ -113,8 +110,7 @@ function check_database(key) {
         //otherwise it's not there
         else {
             return {
-                exists: false,
-                message: "OK",
+                message: "MISSING",
                 data: null
             }
         }
@@ -128,21 +124,27 @@ function generate_wiki_page() {
     let urlunique = false;
 
     try {
+        // check if unique
         while (!urlunique) {
             //generate url
             ///
             ///  code here.
             ///
+            
             if (wikiurl in cache) {
+                // skip if in the cache
                 continue;
             }
+
             if(wikiurl in database){
+                // return if in the database
                 return {
                     message: "OK DATABASE",
                     data: check_database(wikiurl)
                 }
             }
             return {
+                // get from API
                 message: "OK WIKI",
                 data: wikiapi.get(wikiurl)
             }
