@@ -1,8 +1,126 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: lightgray;
+  background-image: url("/images/cross-grey.gif");
+  background-repeat: repeat;
+}
+
+.box{
+  display: block;
+  border-radius: 45px;
+  padding: 10%;
+  background-color: #2b2b2b;
+  width: 50%;
+  height: 50%;
+}
+
+.round {
+  width: 100%;
+  border-radius: 15px;
+  border: 1px #000 solid;
+  padding: 5px 60px 5px 5px;
+  position: absolute; 
+  top: 0;
+  left: 0;
+  z-index: 5;
+}
+
+.art{
+  display: block;
+  padding: 20px;
+  border-radius: 22px;
+  background-color: #212121;
+}
+
+.item{
+  display:flex;
+  flex-direction: column;
+  padding: 10px;
+  border-bottom-style: solid;
+  border-color: #131313;
+}
+.item img {
+  max-width: 300px;
+  margin-right: 5%;
+  display: inline;
+  color: transparent;
+}
+
+
+.go {
+  position: absolute ;
+  top: 10px;
+  right: 10px;
+  height: 20px;
+  width: auto;
+  z-index: 10;
+  border-radius: 10px;
+  border: none;
+  background: #212121; 
+  color: whitesmoke;
+}
+
+.search {
+  position: relative;
+  width: 40%;
+  height: 30px;
 }
 
 a {
-  color: #00B7FF;
+  color: #7794d4;
+}
+
+a > h1{
+  color: lightgray;
+  border-style: none;
+  border: none;
+  /*text-decoration-color: #00B7FF;*/
+}
+label {
+  display: block;
+  font: 1rem 'Fira Sans', sans-serif;
+}
+
+input,
+label {
+  margin: .4rem 0;
+}
+
+.button{
+  background-color: #2b2b2b;
+  border: none;
+  color: lightgray;
+  border-radius: 20px;
+  padding: 15px 25px;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #131313;
+}
+
+
+
+@media screen and (max-width: 1200px){
+  .box{
+    width: 65%;
+  }
+}
+@media screen and (max-width: 1000px){
+  .box{
+    width: 80%;
+  }
+}
+@media screen and (max-width: 600px){
+  body{
+    padding: 5%;
+  }
+  .box{
+    width: 90%;
+    padding: 5%;
+  }
+  
 }
