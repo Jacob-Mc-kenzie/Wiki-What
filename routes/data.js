@@ -28,6 +28,7 @@ export async function check_cache(query){
             return {
                 status: "ERROR",
                 message: "REDIS_FALT",
+                detail: "There was an error when connecting with the redis client.",
                 data: err
             }
         }
