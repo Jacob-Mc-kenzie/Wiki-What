@@ -23,7 +23,7 @@ router.get('/:perma', function (req, res, next) {
             })
             .then((dbres) => {
                 if (dbres.status == "OK") {
-                    resJSON.content = dbres;
+                    resJSON.content = dbres.data;
                     resJSON.fromwho = (dbres.message == "REDIS_EXISTS" ? "Redis Cache" : "S3 Bucket");
                 }
                 else if (dbres.status == "MISSING") {
@@ -34,6 +34,14 @@ router.get('/:perma', function (req, res, next) {
                     resJSON.content = dbres;
                     resJSON.fromwho = "Unknown";
                 }
+                return bk.data.generate_html(resJSON)
+            })
+            .then((page) => {
+                console.log("\nLogging, response berfore processing(/id)\n")
+                console.log(resJSON);
+                const code = (resJSON.type != "ERROR" ? 200 : 500);
+                res.statusCode = code;
+                res.end(page);
             })
             .catch((e) => {
                 resJSON.type = "ERROR";
@@ -49,16 +57,6 @@ router.get('/:perma', function (req, res, next) {
     if (resJSON.query = null) {
         res.redirect(404, "/quote");
     }
-
-    bk.data.generate_html(resJSON)
-        .then(page => {
-            console.log("\nLogging, response berfore processing\n")
-            console.log(resJSON);
-            const code = (resJSON.type != "ERROR" ? 200 : 500);
-            res.statusCode = code;
-            res.end(page);
-        })
-
 });
 
 router.get('/', function (req, res, next) {
@@ -72,9 +70,10 @@ router.get('/', function (req, res, next) {
 
     bk.data.generate_url()
         .then(genres => {
+            console.log("\n 1.Url data generated(/):\n")
+            console.log(genres);
             if (genres.status == "OK") {
-                console.log("\n1.Url data generated:\n")
-                console.log(genres);
+
                 res.redirect(303, "/quote/" + genres.data);
             }
             else {
@@ -86,7 +85,7 @@ router.get('/', function (req, res, next) {
         .then(() => {
             bk.data.generate_html(resJSON)
                 .then(page => {
-                    console.log("\n2.Logging, response berfore processing\n")
+                    console.log("\n 2.Logging, response berfore processing(/)\n")
                     console.log(resJSON);
                     const code = (resJSON.type != "ERROR" ? 200 : 500);
                     res.statusCode = code;

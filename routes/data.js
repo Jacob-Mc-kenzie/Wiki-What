@@ -1,18 +1,18 @@
 
-const redis = require('redis');
+var redis = require('promise-redis')();
 const AWS = require('aws-sdk');
 const axios = require('axios');
 // Cloud Services Set-up
 
-const redisClient = redis.createClient();
+const redisClient = redis.createClient({});
 const bucketName = 'onebig-darn-incredible-wiki-store';
 // Create a promise on S3 service object
 
 const bucketPromise = new AWS.S3({ apiVersion: '2006-03-01' }).createBucket({ Bucket: bucketName }).promise();
 
-redisClient.on('error', (err) => {
-    console.log("error: " + err);
-});
+// redisClient.on('error', (err) => {
+//     console.log("error: " + err);
+// });
 
 bucketPromise.then(function (data) {
     console.log("Successfully created " + bucketName);
@@ -27,16 +27,9 @@ var methods = {};
 methods.check_cache = async function check_cache(query) {
     const redisKey = `wiki:${query}`;
     try {
-        return await redisClient.get(redisKey, (err, res) => {
-            if (err) {
-                return {
-                    status: "ERROR",
-                    message: "REDIS_FALT",
-                    detail: "There was an error when connecting with the redis client.",
-                    data: err
-                }
-            }
-            else if (res) {
+        return await redisClient.get(redisKey)
+        .then((res) => {
+            if (res != null) {
                 const resJSON = JSON.parse(res);
                 return {
                     status: "OK",
@@ -44,12 +37,22 @@ methods.check_cache = async function check_cache(query) {
                     data: resJSON
                 }
             }
-            return {
-                status: "MISSING",
-                message: "NOT_IN_REDIS",
-                data: null
+            else {
+                return {
+                    status: "MISSING",
+                    message: "NOT_IN_REDIS",
+                    data: null
+                }
             }
         })
+        .catch((e)=>{
+            return {
+                status: "ERROR",
+                message: "CACHE_CHECK_ERROR",
+                detail: "Check_cache incountered an unexpected error, " + e.message,
+                data: e
+            }
+        });
     }
     catch (e) {
         return {
@@ -77,7 +80,7 @@ methods.check_database = async function check_database(query) {
             }
             else if (res) {
                 const resJSON = JSON.parse(res);
-                redisClient.setex(redisKey, 3600, JSON.stringify({ ...resJSON, }));
+                redisClient.setex(redisKey, 3600, JSON.stringify(resJSON));
                 return {
                     status: "OK",
                     message: "S3_EXISTS",
@@ -114,35 +117,25 @@ methods.generate_url = async function generate_url() {
                     thumbnail: resp.data.thumbnail.source,
                     extract_html: resp.data.extract_html
                 };
+                console.log("\nUploading Data: \n");
+                console.log(data);
                 const query = hashcode(resp.data.titles.canonical);
                 const s3Key = `wiki-${query}`;
                 const redisKey = `wiki:${query}`;
-                redisClient.setex(redisKey, 3600, JSON.stringify({ ...data }));
-                const body = JSON.stringify({ ...data });
+                redisClient.setex(redisKey, 3600, JSON.stringify(data));
+                const body = JSON.stringify(data);
                 const objectParams = { Bucket: bucketName, Key: s3Key, Body: body };
                 const uploadPromise = new AWS.S3({ apiVersion: '2006-03-01' }).putObject(objectParams).promise();
                 uploadPromise.then(function (d) {
                     console.log("Successfully uploaded data to " + bucketName + "/" + s3Key);
 
                 })
-                    .then(() => {
-                        return {
-                            status: "OK",
-                            message: "AWAITING_RE-DIRECT",
-                            detail: "state has been saved, sending new url now.",
-                            data: query
-                        }
-                    })
-                    .catch(e => {
-                        return {
-                            status: "ERROR",
-                            message: "S3_UPLOAD_ERROR",
-                            detail: "There was an error when attempting to upload to s3.",
-                            data: e
-                        }
-                    });
-
-
+                return {
+                    status: "OK",
+                    message: "AWAITING_RE-DIRECT",
+                    detail: "state has been saved, sending new url now.",
+                    data: query
+                }
             }
             else {
                 return {
@@ -169,7 +162,17 @@ methods.generate_url = async function generate_url() {
 // data {
 //     query: "endofpageurlhere",
 //     type: "TEXT", "IMAGE" or "ERROR",
-//     content: theJSONobject_From_wherever,
+//     content: {
+//      status: "ERROR",
+//      message: "UNKNOWN_STATE-RESTORE_ERROR",
+//      detail: "An unknown error has occured, it says: " + e.message,
+//      content: either an error or {
+//         url:,
+//         title:,
+//         thumbnail:
+//         extract_html:
+//          }
+//      }
 //     fromwho: "where the data came from"
 // }
 methods.generate_html = async function generate_html(data) {
@@ -182,16 +185,34 @@ methods.generate_html = async function generate_html(data) {
         <meta charset="utf-8">
         <link rel="icon" href="favicon.png">
         <meta name="theme-color" content="#212121">
-    </head><body>`;
+    </head><body><div class="box">`;
     try {
+        var url;
+        page = page + "<h1>Tempory page, type: " + data.type + "</h1>\n";
+        if(data.type == "ERROR"){
+            url = "/";
+            page = page + `<h1> Error </h1>
+                           <h3>`+data.message+`</h3>
+                           <h4>That's an error</h4>
+                           <p>`+data.detail+`</p>
+                           <a href="/"><p>Try again?</p></a>
+                           `;
+        }
+        else{
+            url = (data.type == "TEXT"? "/quote/": "/image/") + data.query;
+            if(data.type == "TEXT"){
+                page = page + `<h1>Tempory page</h1>
+                               <h2>`+data.content.title+`</h2>
+                               `+data.content.extract_html+`
+                               <a href="`+url+`"><p>This is a permalink</p></a>`;
+            }
+            else{
 
+            }
+        }
 
-        let url = data.content != null ? (data.content.type == "TEXT" ? "/quote/" + data.query : data.content.type == "IMAGE" ? "/image/" + data.query : "/") : "/";
-
-        page = page + "<h1>Tempory page, type: " + data.content.type + "</h1>\n" +
-            "<p>" + data.content.message + "</p>" +
-            "<a href=\"" + url + "\"><p>This is a permalink</p></a>" +
-            "<h4>from " + data.fromwho + "</h4> </body></html>";
+        page = page + 
+            "<br/><h4>from " + data.fromwho + "</h4> </div></body></html>";
     }
     catch (e) {
         page = page + "<h1>Tempory page, type: ERROR</h1>\n" +
