@@ -1,8 +1,8 @@
-import { check_database, check_cache, generate_html } from './data.js';
+const bk = require('./data.js');
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
+
 router.get('/:perma', function (req, res, next) {
 
     var resJSON = {
@@ -16,38 +16,108 @@ router.get('/:perma', function (req, res, next) {
         const newstate = req.params.perma;
         resJSON.query = newstate;
 
-        check_cache(newstate)
+        bk.data.check_cache(newstate)
             .then((cacheres) => {
-                if (cacheres.status == "MISSING") {return check_database(newstate);}
-                else {return cacheres;}
+                if (cacheres.status == "MISSING") { return bk.data.check_database(newstate); }
+                else { return cacheres; }
             })
             .then((dbres) => {
-                if (dbres.status == "OK") 
-                {
+                if (dbres.status == "OK") {
                     resJSON.content = dbres;
-                    resJSON.fromwho = (dbres.message == "REDIS_EXISTS"? "Redis Cache":"S3 Bucket");    
+                    resJSON.fromwho = (dbres.message == "REDIS_EXISTS" ? "Redis Cache" : "S3 Bucket");
                 }
                 else if (dbres.status == "MISSING") {
-                    resJSON.query = null;   
+                    res.redirect(404, "/quote");
                 }
                 else {
+                    resJSON.type = "ERROR";
                     resJSON.content = dbres;
                     resJSON.fromwho = "Unknown";
                 }
+            })
+            .catch((e) => {
+                resJSON.type = "ERROR";
+                resJSON.content = {
+                    status: "ERROR",
+                    message: "UNKNOWN_STATE-RESTORE_ERROR",
+                    detail: "An unknown error has occured, it says: " + e.message,
+                    data: e
+                };
+                resJSON.fromwho = "Unknown";
+            });
+    }
+    if (resJSON.query = null) {
+        res.redirect(404, "/quote");
+    }
+
+    bk.data.generate_html(resJSON)
+        .then(page => {
+            console.log("\nLogging, response berfore processing\n")
+            console.log(resJSON);
+            const code = (resJSON.type != "ERROR" ? 200 : 500);
+            res.statusCode = code;
+            res.end(page);
         })
-        .catch((e)=>{
+
+});
+
+router.get('/', function (req, res, next) {
+
+    var resJSON = {
+        query: null,
+        type: "TEXT",
+        content: null,
+        fromwho: "Wikipedia API"
+    };
+
+    bk.data.generate_url()
+        .then(genres => {
+            if (genres.status == "OK") {
+                console.log("\n1.Url data generated:\n")
+                console.log(genres);
+                res.redirect(303, "/quote/" + genres.data);
+            }
+            else {
+                resJSON.type = "ERROR";
+                resJSON.content = genres;
+                resJSON.fromwho = "Wikipedia API";
+            }
+        })
+        .then(() => {
+            bk.data.generate_html(resJSON)
+                .then(page => {
+                    console.log("\n2.Logging, response berfore processing\n")
+                    console.log(resJSON);
+                    const code = (resJSON.type != "ERROR" ? 200 : 500);
+                    res.statusCode = code;
+                    res.end(page);
+                })
+
+        })
+        .catch((e) => {
+            resJSON.type = "ERROR";
             resJSON.content = {
                 status: "ERROR",
-                message: "UNKNOWN_ERROR",
-                detail: "An unknown error has occured, it says: "+e.message,
+                message: "UNKNOWN_NEW-STATE_ERROR",
+                detail: "An unknown error has occured, it says: " + e.message,
                 data: e
             };
             resJSON.fromwho = "Unknown";
+
+            bk.data.generate_html(resJSON)
+                .then(page => {
+                    console.log("\nLogging, response berfore processing\n")
+                    console.log(resJSON);
+                    const code = (resJSON.type != "ERROR" ? 200 : 500);
+                    res.statusCode = code;
+                    res.end(page);
+                })
+
         });
-    }
-    if (resJSON.query = null){
-        
-    }
+
+
+
 });
+
 
 module.exports = router;

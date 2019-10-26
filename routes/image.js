@@ -1,1 +1,1 @@
-import { check_database, check_cache, generate_html } from './data.js';
+const bk = require('./data.js');
