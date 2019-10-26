@@ -16,6 +16,7 @@ const bucketPromise = new AWS.S3({ apiVersion: '2006-03-01' }).createBucket({ Bu
 
 bucketPromise.then(function (data) {
     console.log("Successfully created " + bucketName);
+    console.log(data);
 })
     .catch(function (err) {
         console.error(err, err.stack);
@@ -68,40 +69,36 @@ methods.check_database = async function check_database(query) {
     const s3Key = `wiki-${query}`;
     const redisKey = `wiki:${query}`;
     const params = { Bucket: bucketName, Key: s3Key };
-    return await new AWS.S3({ apiVersion: '2006-03-01' }).getObject(params)
-        .then(function (err, res) {
-            if (err) {
-                return {
-                    status: "ERROR",
-                    message: "S3_GET_ERROR",
-                    detail: "AWS returned an error when searching for " + query,
-                    data: err
-                }
-            }
-            else if (res) {
-                const resJSON = JSON.parse(res);
-                redisClient.setex(redisKey, 3600, JSON.stringify(resJSON));
+    try {
+        return await getObject(params)
+        .then(function (data) {
+            const objectData = data.Body.toString('utf-8');
+            const resJSON = JSON.parse(objectData);
+            redisClient.setex(redisKey, 3600, JSON.stringify(resJSON));
+            //console.log(resJSON);
                 return {
                     status: "OK",
                     message: "S3_EXISTS",
                     data: resJSON
                 }
-            }
-            return {
-                status: "MISSING",
-                message: "NOT_IN_S3",
-                detail: "Queried item was not found in the database.",
-                data: null
-            }
         })
-        .catch(function (e) {
+        .catch(e =>{
             return {
                 status: "ERROR",
-                message: "S3_PROMISE_ERROR",
-                detail: "Check_database incountered an unexpected error, " + e.message,
+                message: "S3_GET_ERROR",
+                detail: "AWS returned an error when searching for " + query,
                 data: e
             }
         });
+    }
+    catch(e){
+        return {
+            status: "ERROR",
+            message: "S3_PROMISE_ERROR",
+            detail: "Check_database incountered an unexpected error, " + e.message,
+            data: e
+        }
+    }
 }
 
 methods.generate_url = async function generate_url() {
@@ -237,6 +234,19 @@ function hashcode(s) {
         hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
+}
+
+
+function getObject(key) {
+    return new Promise((resolve, reject) => {
+        new AWS.S3({ apiVersion: '2006-03-01' }).getObject({
+            Bucket: key.Bucket,
+            Key: key.Key
+        }, (err, data) => {
+            if ( err ) reject(err)
+            else resolve(data)
+        })
+    })
 }
 
 exports.data = methods;
