@@ -7,7 +7,7 @@ const responseTime = require('response-time')
 
 var indexRouter = require('./routes/index');
 var textRouter = require('./routes/text');
-//var imageRouter = require('./routes/image');
+var imageRouter = require('./routes/image');
 
 var app = express();
 
@@ -24,7 +24,7 @@ app.use(responseTime());
 
 app.use('/', indexRouter);
 app.use('/quote', textRouter);
-//app.use('/image', imageRouter);
+app.use('/image', imageRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -39,8 +39,7 @@ app.use(function(req, res, next) {
     '</div></div>' +
     '</body><style> body {background-image: url("/images/cross-red.gif");}</style>';
     res.statusCode = 404;
-    res.setHeader('Content-Type', 'text/html');
-    res.end(response);
+    res.end(page);
 });
 
 // error handler
