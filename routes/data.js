@@ -206,7 +206,7 @@ methods.generate_html = async function generate_html(data) {
             else{
                 page = page + `<h1>Tempory page</h1>
                                <h2>`+data.content.title+`</h2>
-                               `+data.content.extract_html+`
+                               <img src="`+data.content.thumbnail+`"/>
                                <a href="`+url+`"><p>This is a permalink</p></a>`;
             }
         }
