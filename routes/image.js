@@ -76,6 +76,9 @@ router.get('/', function (req, res, next) {
 
                 res.redirect(303, "/image/" + genres.data);
             }
+            else if(genres.status == "EXISTS"){
+                res.redirect(303, "/image");
+            }
             else {
                 resJSON.type = "ERROR";
                 resJSON.content = genres;

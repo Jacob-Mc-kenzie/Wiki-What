@@ -122,9 +122,18 @@ methods.generate_url = async function generate_url() {
                     thumbnail: resp.data.thumbnail.source,
                     extract_html: resp.data.extract_html
                 };
+                
                 console.log("\nUploading Data: \n");
                 console.log(data);
                 const query = hashcode(resp.data.titles.canonical);
+                if(this.check_cache(query).status == "OK"){
+                    return{
+                        status: "EXISTS",
+                        message: "ALREADY_SEEN",
+                        detail: "the generated data has already been seen",
+                        data: resp
+                    }
+                }
                 const s3Key = `wiki-${query}`;
                 const redisKey = `wiki:${query}`;
                 redisClient.setex(redisKey, 3600, JSON.stringify(data));
