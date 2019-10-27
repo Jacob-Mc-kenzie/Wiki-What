@@ -185,35 +185,41 @@ methods.generate_html = async function generate_html(data) {
     </head><body><div class="box">`;
     try {
         var url;
-        page = page + "<h1>Tempory page, type: " + data.type + "</h1>\n";
+        // error
         if(data.type == "ERROR"){
             url = "/";
             page = page + `<h1> Error </h1>
-                           <h3>`+data.message+`</h3>
+                           <h3>${data.message}</h3>
                            <h4>That's an error</h4>
-                           <p>`+data.detail+`</p>
+                           <p>${data.detail}</p>
                            <a href="/"><p>Try again?</p></a>
                            `;
         }
+        
         else{
             url = (data.type == "TEXT"? "/quote/": "/image/") + data.query;
+            // text
             if(data.type == "TEXT"){
-                page = page + `<h1>Tempory page</h1>
-                               <h2>`+data.content.title+`</h2>
-                               `+data.content.extract_html+`
-                               <a href="`+url+`"><p>This is a permalink</p></a>`;
+                page = page + 
+                               `<div class="box"><h2>${data.content.title}</h2>
+                               <div>${data.content.extract_html}</div>
+                               <a href="/quote"><button class="go">Generate another</button></a>
+                               <a href="/"><button class="go">Homepage</button></a>`;
             }
+            //<a href="${url}"><p>This is a permalink</p></a></div>
+            // image
             else{
-                page = page + `<h1>Tempory page</h1>
-                               <h2>`+data.content.title+`</h2>
-                               <img src="`+data.content.thumbnail+`"/>
-                               <a href="`+url+`"><p>This is a permalink</p></a>`;
+                page = page + `<div class="box"><h2>${data.content.title}</h2>
+                               <img src="${data.content.thumbnail}"/><br />
+                               <a href="/image"><button class="go">Generate another</button></a>
+                               <a href="/"><button class="go">Homepage</button></a>`;
             }
         }
-
+        // bottom
         page = page + 
-            "<br/><h4>from " + data.fromwho + "</h4> </div></body></html>";
+            `<br/><h4>from ${data.fromwho}</h4> </div></body></html>`;
     }
+    // error
     catch (e) {
         page = page + "<h1>Tempory page, type: ERROR</h1>\n" +
             "<p>" + e.message + "</p>" +
