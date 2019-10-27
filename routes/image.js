@@ -88,8 +88,8 @@ router.get('/', function (req, res, next) {
                     console.log("\n 2.Logging, response berfore processing(/)\n")
                     console.log(resJSON);
                     const code = (resJSON.type != "ERROR" ? 200 : 500);
-                    res.statusCode = code;
-                    res.end(page);
+                    //res.statusCode = code;
+                    res.send(page);
                 })
 
         })
