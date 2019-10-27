@@ -192,18 +192,25 @@ methods.generate_url = async function generate_url() {
 methods.generate_html = async function generate_html(data) {
 
     let page = `<!DOCTYPE html>
-    <head><title>Wiki-What</title><link rel="icon" href="../favicon.png">
-    <link rel="stylesheet" type="text/css" href="../stylesheets/style.css"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    </head>`
+    <head>
+        <title>Wiki-What</title>
+        <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8">
+        <link rel="icon" href="../favicon.png">
+        <meta name="theme-color" content="#212121">
+    </head>
+    <body>
+    <a href="/" style="text-decoration: none"><h1 class="title">WIKI-WHAT</h1></a>
+        <div class="box">`;
 
     try {
         var url;
         // error
         if(data.type == "ERROR"){
             url = "/";
-            page = page + `<h1> Error </h1>
-                           <h3>${data.content.message}</h3>
+            page = page + `<h1 > Error </h1>
+                           <h3style="color:#ba3b3b;">${data.content.message}</h3>
                            <h4>That's an error</h4>
                            <p>${data.content.detail}</p>
                            <a href="/"><p>Try again?</p></a>
@@ -215,8 +222,7 @@ methods.generate_html = async function generate_html(data) {
             // text
             if(data.type == "TEXT"){
                 page = page + 
-                `<a href="/"><h1 class="title">WIKI-WHAT</h1></a>
-                <div class="box">
+                `
                 <h1>${data.content.title}</h1>
                 <h2 id="text">${data.content.extract_html}</h2>
                 <a href="/quote"><h1>Generate another</h1></a>
@@ -226,8 +232,7 @@ methods.generate_html = async function generate_html(data) {
             // image
             else{
                 page = page + 
-                `<a href="/"><h1 class="title">WIKI-WHAT</h1></a>
-                <div class="box">
+                `
                 <a class="center" href="${data.content.url}"><img src="${data.content.thumbnail}"/></a><br />
                 <a href="/image"><h1>Generate another</h1></a>
                 </div>`;
