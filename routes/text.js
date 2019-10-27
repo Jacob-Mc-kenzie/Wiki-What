@@ -27,7 +27,7 @@ router.get('/:perma', function (req, res, next) {
                     resJSON.fromwho = (dbres.message == "REDIS_EXISTS" ? "Redis Cache" : "S3 Bucket");
                 }
                 else if (dbres.status == "MISSING") {
-                    res.redirect(404, "/quote");
+                    res.redirect("/quote");
                 }
                 else {
                     resJSON.type = "ERROR";
@@ -55,7 +55,7 @@ router.get('/:perma', function (req, res, next) {
             });
     }
     if (resJSON.query = null) {
-        res.redirect(404, "/quote");
+        res.redirect("/quote");
     }
 });
 
@@ -75,6 +75,9 @@ router.get('/', function (req, res, next) {
             if (genres.status == "OK") {
 
                 res.redirect(303, "/quote/" + genres.data);
+            }
+            else if(genres.status == "EXISTS"){
+                res.redirect(303, "/quote");
             }
             else {
                 resJSON.type = "ERROR";

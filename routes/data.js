@@ -75,7 +75,7 @@ methods.check_database = async function check_database(query) {
             const objectData = data.Body.toString('utf-8');
             const resJSON = JSON.parse(objectData);
             redisClient.setex(redisKey, 3600, JSON.stringify(resJSON));
-            //console.log(resJSON);
+            console.log(resJSON);
                 return {
                     status: "OK",
                     message: "S3_EXISTS",
@@ -83,6 +83,14 @@ methods.check_database = async function check_database(query) {
                 }
         })
         .catch(e =>{
+            if(e.code == "NoSuchKey"){
+                return {
+                    status: "MISSING",
+                    message: "NOT_FOUND_IN_S3",
+                    detail: "The spesified key "+query+" could not be found",
+                    data: e
+                }
+            }
             return {
                 status: "ERROR",
                 message: "S3_GET_ERROR",
@@ -114,9 +122,18 @@ methods.generate_url = async function generate_url() {
                     thumbnail: resp.data.thumbnail.source,
                     extract_html: resp.data.extract_html
                 };
+                
                 console.log("\nUploading Data: \n");
                 console.log(data);
                 const query = hashcode(resp.data.titles.canonical);
+                if(this.check_cache(query).status == "OK"){
+                    return{
+                        status: "EXISTS",
+                        message: "ALREADY_SEEN",
+                        detail: "the generated data has already been seen",
+                        data: resp
+                    }
+                }
                 const s3Key = `wiki-${query}`;
                 const redisKey = `wiki:${query}`;
                 redisClient.setex(redisKey, 3600, JSON.stringify(data));
@@ -186,9 +203,9 @@ methods.generate_html = async function generate_html(data) {
         if(data.type == "ERROR"){
             url = "/";
             page = page + `<h1> Error </h1>
-                           <h3>${data.message}</h3>
+                           <h3>${data.content.message}</h3>
                            <h4>That's an error</h4>
-                           <p>${data.detail}</p>
+                           <p>${data.content.detail}</p>
                            <a href="/"><p>Try again?</p></a>
                            `;
         }
