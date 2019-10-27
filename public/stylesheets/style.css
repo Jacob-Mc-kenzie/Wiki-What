@@ -1,25 +1,35 @@
 body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   color: #111;
-  background-color: #ebebeb;
+  background-color: #e0e0e0;
 }
 
-
-a h1:hover {
+.title {
+  color:white;
+}
+ 
+.title:hover {
   color: black;
+  cursor: pointer;
 }
 
+
+#text {
+  text-decoration: none;
+  color:black;
+}
 
 a {
   color: #7794d4;
 }
 
-a > .bar{
+a > h1{
   color: black;
   border-style: none;
   border: none;
   /*text-decoration-color: #00B7FF;*/
 }
+
 
 .box{
   margin: 50px;
@@ -31,7 +41,10 @@ a > .bar{
   display: flex;
   justify-content: center;
   align-content: center;
-  margin-right: 10px ;
+}
+
+#space {
+  margin-right: 10px;
   margin-left: 10px;
 }
 
@@ -58,27 +71,4 @@ a > .bar{
 
 .button:hover {
   background-color: #131313;
-}
-
-
-
-@media screen and (max-width: 1200px){
-  .box{
-    width: 65%;
-  }
-}
-@media screen and (max-width: 1000px){
-  .box{
-    width: 80%;
-  }
-}
-@media screen and (max-width: 600px){
-  body{
-    padding: 5%;
-  }
-  .box{
-    width: 90%;
-    padding: 5%;
-  }
-  
 }

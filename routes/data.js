@@ -215,22 +215,21 @@ methods.generate_html = async function generate_html(data) {
             // text
             if(data.type == "TEXT"){
                 page = page + 
-                `<a href="/"><h1>WIKI-WHAT</h1></a>
+                `<a href="/"><h1 class="title">WIKI-WHAT</h1></a>
                 <div class="box">
-                <h2>${data.content.title}</h2>
-                <a href="${data.content.url}"><div>${data.content.extract_html}</div></a>
-                <a href="/quote">Generate another</a>
+                <h1>${data.content.title}</h1>
+                <h2 id="text">${data.content.extract_html}</h2>
+                <a href="/quote"><h1>Generate another</h1></a>
                 </div>`;
             }
             //<a href="${url}"><p>This is a permalink</p></a></div>
             // image
             else{
                 page = page + 
-                `<a href="/"><h1>WIKI-WHAT</h1></a>
+                `<a href="/"><h1 class="title">WIKI-WHAT</h1></a>
                 <div class="box">
-                <img class="center" src="${data.content.thumbnail}"/><br />
-                <a href="/image"><button class="go">Generate another</button></a>
-                <a href="${data.content.url}"><button class="go">go to page</button></a>
+                <a class="center" href="${data.content.url}"><img src="${data.content.thumbnail}"/></a><br />
+                <a href="/image"><h1>Generate another</h1></a>
                 </div>`;
             }
         }
