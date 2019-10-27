@@ -1,77 +1,22 @@
 body {
-
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  color: lightgray;
-  background-image: url("/images/cross-grey.gif");
-  background-repeat: repeat;
+  color: #111;
+  background-color: #e0e0e0;
 }
 
-h1 {
-  font-size: 40px;
+.title {
+  color:white;
 }
-h2 {
-  font-size: 30px;
-}
-
-.box{
-  margin: 50px;
-  padding: 50px;
-  border-radius: 45px;
-  padding: 10%;
-  background-color: #2b2b2b;
-  width: 70%;
-  height: 100%;
-}
-
-.round {
-  width: 100%;
-  border-radius: 15px;
-  border: 1px #000 solid;
-  padding: 5px 60px 5px 5px;
-  position: absolute; 
-  top: 0;
-  left: 0;
-  z-index: 5;
-}
-
-.art{
-  display: block;
-  padding: 20px;
-  border-radius: 22px;
-  background-color: #212121;
-}
-
-.item{
-  display:flex;
-  flex-direction: column;
-  padding: 10px;
-  border-bottom-style: solid;
-  border-color: #131313;
-}
-.item img {
-  max-width: 300px;
-  margin-right: 5%;
-  display: inline;
-  color: transparent;
+ 
+.title:hover {
+  color: black;
+  cursor: pointer;
 }
 
 
-.go {
-  padding: 10px;
-  font-size: 20px;
-  border-radius: 10px;
-  border-width: 2px;
-  border-color: whitesmoke ;
-  background: #212121; 
-  color: whitesmoke;
-  margin-right: 20px ;
-  margin-left: 20px ;
-}
-
-.search {
-  position: relative;
-  width: 40%;
-  height: 30px;
+#text {
+  text-decoration: none;
+  color:black;
 }
 
 a {
@@ -79,20 +24,39 @@ a {
 }
 
 a > h1{
-  color: lightgray;
+  color: black;
   border-style: none;
   border: none;
   /*text-decoration-color: #00B7FF;*/
 }
-label {
-  display: block;
-  font: 1rem 'Fira Sans', sans-serif;
+
+
+.box{
+  margin: 50px;
+  padding: 50px;
+  text-align: center;
 }
 
-input,
-label {
-  margin: .4rem 0;
+.center {
+  display: flex;
+  justify-content: center;
+  align-content: center;
 }
+
+#space {
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.go {
+
+  font-size: 20px;
+  text-decoration: underline;
+
+  margin-right: 20px ;
+  margin-left: 20px ;
+}
+
 
 .button{
   background-color: #2b2b2b;
@@ -107,30 +71,4 @@ label {
 
 .button:hover {
   background-color: #131313;
-}
-
-.largefont {
-  font-size: 20px;
-}
-
-
-@media screen and (max-width: 1200px){
-  .box{
-    width: 65%;
-  }
-}
-@media screen and (max-width: 1000px){
-  .box{
-    width: 80%;
-  }
-}
-@media screen and (max-width: 600px){
-  body{
-    padding: 5%;
-  }
-  .box{
-    width: 90%;
-    padding: 5%;
-  }
-  
 }

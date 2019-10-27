@@ -40,8 +40,8 @@ router.get('/:perma', function (req, res, next) {
                 console.log("\nLogging, response berfore processing(/id)\n")
                 console.log(resJSON);
                 const code = (resJSON.type != "ERROR" ? 200 : 500);
-                res.statusCode = code;
-                res.end(page);
+                //res.statusCode = code;
+                res.send(page);
             })
             .catch((e) => {
                 resJSON.type = "ERROR";
