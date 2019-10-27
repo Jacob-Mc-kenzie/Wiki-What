@@ -75,7 +75,7 @@ methods.check_database = async function check_database(query) {
             const objectData = data.Body.toString('utf-8');
             const resJSON = JSON.parse(objectData);
             redisClient.setex(redisKey, 3600, JSON.stringify(resJSON));
-            //console.log(resJSON);
+            console.log(resJSON);
                 return {
                     status: "OK",
                     message: "S3_EXISTS",
@@ -83,6 +83,14 @@ methods.check_database = async function check_database(query) {
                 }
         })
         .catch(e =>{
+            if(e.code == "NoSuchKey"){
+                return {
+                    status: "MISSING",
+                    message: "NOT_FOUND_IN_S3",
+                    detail: "The spesified key "+query+" could not be found",
+                    data: e
+                }
+            }
             return {
                 status: "ERROR",
                 message: "S3_GET_ERROR",
@@ -177,10 +185,10 @@ methods.generate_html = async function generate_html(data) {
     <html>
     <head>
         <title>Wiki-What`+ (data.type == "TEXT" ? `-teeeext` : data.type == "IMAGE" ? `-imaaaaage` : `-Error`) + `</title>
-        <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+        <link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta charset="utf-8">
-        <link rel="icon" href="favicon.png">
+        <link rel="icon" href="../favicon.png">
         <meta name="theme-color" content="#212121">
     </head><body><div class="box">`;
     try {
@@ -189,9 +197,9 @@ methods.generate_html = async function generate_html(data) {
         if(data.type == "ERROR"){
             url = "/";
             page = page + `<h1> Error </h1>
-                           <h3>${data.message}</h3>
+                           <h3>${data.content.message}</h3>
                            <h4>That's an error</h4>
-                           <p>${data.detail}</p>
+                           <p>${data.content.detail}</p>
                            <a href="/"><p>Try again?</p></a>
                            `;
         }

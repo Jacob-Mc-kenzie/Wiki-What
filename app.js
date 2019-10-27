@@ -39,7 +39,7 @@ app.use(function(req, res, next) {
     '</div></div>' +
     '</body><style> body {background-image: url("/images/cross-red.gif");}</style>';
     res.statusCode = 404;
-    res.end(page);
+    res.end(response);
 });
 
 // error handler
