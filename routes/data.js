@@ -3,8 +3,11 @@ var redis = require('promise-redis')();
 const AWS = require('aws-sdk');
 const axios = require('axios');
 // Cloud Services Set-up
+const REDISCACHEHOSTNAME="Asign2.redis.cache.windows.net";
+const REDISCACHEKEY="XMrh41+ujAoLV33HmXUWz6xxsNLFbYuQX+beqEzIep8=";
 
-const redisClient = redis.createClient({});
+const redisClient = redis.createClient(6380, REDISCACHEHOSTNAME,
+    {auth_pass: REDISCACHEKEY, tls: {servername: REDISCACHEHOSTNAME}});
 const bucketName = 'onebig-darn-incredible-wiki-store';
 
 // Create a promise on S3 service object
